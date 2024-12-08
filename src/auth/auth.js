@@ -12,7 +12,8 @@ class Auth {
             grant_type: 'password',
             username: process.env.ROBINHOOD_USERNAME,
             password: process.env.ROBINHOOD_PASSWORD,
-            client_id: this.clientID
+            client_id: this.clientID,
+            scope: 'read'  // Assuming 'read' is the correct scope; adjust as needed
         };
 
         try {

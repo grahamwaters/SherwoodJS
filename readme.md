@@ -96,3 +96,101 @@ This README provides:
 - **Contribution guidelines**: Encouraging community involvement.
 - **License information**: It's important to specify the terms under which the software is licensed.
 - **Disclaimer**: A standard disclaimer noting that this is not officially affiliated with Robinhood and is intended for educational purposes.
+
+
+# Development
+I am using a notebook running JS as a kernel and ijavascript to test the code.
+```bash
+npm install -g ijavascript
+ijsinstall
+```
+I set up the `auth.js` file with the following block of code. It is to implement the login logic using Axios to handle HTTP requests:
+```js
+const axios = require('axios');
+require('dotenv').config();
+
+class Auth {
+    constructor() {
+        this.apiURL = 'https://api.robinhood.com/oauth2/token/';
+        this.clientID = 'c82fd958-5cb6-4f6a-b69d-12f8851a4dae'; // Robinhood's public client ID
+    }
+
+    async login() {
+        const data = {
+            grant_type: 'password',
+            username: process.env.ROBINHOOD_USERNAME,
+            password: process.env.ROBINHOOD_PASSWORD,
+            client_id: this.clientID
+        };
+
+        try {
+            const response = await axios.post(this.apiURL, data);
+            this.accessToken = response.data.access_token;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
+            console.log("Logged in successfully.");
+            return this.accessToken;
+        } catch (error) {
+            console.error('Login failed:', error.response ? error.response.data : error.message);
+            return null;
+        }
+    }
+}
+
+module.exports = Auth;
+```
+Add your `.env` file to the `.gitignore`.
+# Env File
+```env
+# this is where you store your login credentials.
+ROBINHOOD_USERNAME=your_username
+ROBINHOOD_PASSWORD=your_password
+```
+Your `.gitignore`
+```
+/.vscode
+.env
+```
+In `src/account`, create a file named `account.js`.
+Use the authentication token to fetch portfolio details:
+```javascript
+const axios = require('axios');
+const Auth = require('../auth/auth');
+
+class Account {
+    constructor() {
+        this.auth = new Auth();
+    }
+
+    async getPortfolio() {
+        if (!this.auth.accessToken) {
+            await this.auth.login();
+        }
+
+        try {
+            const response = await axios.get('https://api.robinhood.com/portfolios/');
+            console.log("Portfolio:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to retrieve portfolio:', error.response ? error.response.data : error.message);
+            return null;
+        }
+    }
+}
+
+module.exports = Account;
+```
+# Testing the Implementation
+Run all Scripts:
+- Create a test.js file in the root directory.
+- Import and use your modules to make sure they work correctly:
+```javascript
+const Account = require('./src/account/account');
+
+async function displayPortfolio() {
+    const account = new Account();
+    const portfolio = await account.getPortfolio();
+    console.log(portfolio);
+}
+
+displayPortfolio();
+```

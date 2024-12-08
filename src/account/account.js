@@ -1,5 +1,5 @@
 const axios = require('axios');
-const Auth = require('../auth/auth');
+const Auth = require('./auth');
 
 class Account {
     constructor() {
