@@ -1,5 +1,8 @@
+require('dotenv').config();  // Ensure this is at the top
+console.log(process.env.ROBINHOOD_USERNAME);
+
 const axios = require('axios');
-const Auth = require('./auth');
+const Auth = require('../auth/auth');
 
 class Account {
     constructor() {

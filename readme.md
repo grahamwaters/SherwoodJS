@@ -194,3 +194,83 @@ async function displayPortfolio() {
 
 displayPortfolio();
 ```
+
+# The Auth Class
+The `Auth` class we created effectively sets up and handles the login process to Robinhood's API using JavaScript with Node.js. This class is designed to manage the authentication process, including sending the login credentials and handling the response. Here’s a breakdown of each part and what you might want to be aware of:
+
+### Breaking Down the `Auth` Class:
+
+1. **Constructor**:
+   - `apiURL`: Sets the endpoint for the OAuth2 token request.
+   - `clientID`: Specifies the client ID. This ID should be provided by Robinhood when you register your application or might be a public ID for general API access. In your case, it's a hardcoded value, which is fine for example purposes but should be securely managed in production applications.
+
+2. **Login Method**:
+   - **Payload Setup**: Constructs the data object that includes all necessary parameters for the OAuth2 authentication request:
+     - `grant_type`: This is typically `'password'` for this kind of OAuth flow.
+     - `username` and `password`: These are pulled from environment variables, ensuring sensitive credentials aren’t hardcoded in your source code.
+     - `client_id`: Passed from the class property.
+     - `scope`: Defines the permissions the application is requesting. The `'read'` scope must align with the specific permissions granted by Robinhood; this might need adjustment based on what access your application actually requires.
+   - **Making the HTTP Request**: Uses Axios to send a POST request to the Robinhood API with the constructed payload.
+   - **Response Handling**:
+     - **Success**: If the request is successful, it logs the success, extracts the `access_token` from the response, and sets it for future Axios requests. This token is crucial for making authenticated API calls.
+     - **Error**: If there’s an error (e.g., wrong credentials, network issues), it logs the detailed error message. This is crucial for debugging issues with authentication.
+
+3. **Usage**:
+   - You would typically create an instance of this `Auth` class and call the `login` method to authenticate. After logging in successfully, you can use the `accessToken` for making other API requests that require authentication.
+
+### Example Usage:
+
+Here's how you might use this class in your application:
+
+```javascript
+const Auth = require('./path/to/auth'); // Adjust the path as necessary
+
+async function authenticate() {
+    const auth = new Auth();
+    try {
+        const token = await auth.login();
+        console.log('Authentication successful, token:', token);
+    } catch (error) {
+        console.error('Authentication failed:', error);
+    }
+}
+
+authenticate();
+```
+
+### Improvements and Considerations:
+
+- **Error Handling**: More robust error handling could be implemented to manage different types of authentication errors more effectively.
+- **Security**: Ensure that the environment variables are securely managed and not exposed, especially in a production environment.
+- **Scopes and Permissions**: Verify the required scopes by checking the Robinhood API documentation or your application configuration within Robinhood.
+
+This setup provides a solid foundation for managing authentication with Robinhood’s API in a Node.js application. Adjustments may be necessary based on specific requirements or changes in the API.
+
+# Rate Limits on Robinhood
+
+Rate Limits
+Requests per minute per user account: 100
+Requests per minute per user account in bursts: 300
+[See their documentation here](https://docs.robinhood.com/crypto/trading/#section/Rate-Limiting)
+
+# APIs
+I used the code below to generate an API key.
+```js
+const nacl = require('tweetnacl')
+const base64 = require('base64-js')
+
+// Generate an Ed25519 keypair
+const keyPair = nacl.sign.keyPair()
+
+// Convert keys to base64 strings
+const private_key_base64 = base64.fromByteArray(keyPair.secretKey)
+const public_key_base64 = base64.fromByteArray(keyPair.publicKey)
+
+// Print keys in the base64 format
+console.log("Private Key (Base64)")
+console.log(private_key_base64)
+
+console.log("Public Key (Base64):")
+console.log(public_key_base64)
+```
+You will also need to do this `npm install tweetnacl base64-js` to install those packages.
