@@ -274,3 +274,6 @@ console.log("Public Key (Base64):")
 console.log(public_key_base64)
 ```
 You will also need to do this `npm install tweetnacl base64-js` to install those packages.
+
+# Goals
+1. Authentication via API call.
